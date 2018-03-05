@@ -1,4 +1,4 @@
-;;; prelude-mediawiki.el --- Emacs Prelude: mediawiki editing config
+;;; prelude-company.el --- company-mode setup
 ;;
 ;; Copyright © 2011-2017 Bozhidar Batsov
 ;;
@@ -11,7 +11,7 @@
 
 ;;; Commentary:
 
-;; Basic configs for access to WikEmacs and Wikipedia.
+;; company-mode config.
 
 ;;; License:
 
@@ -31,17 +31,18 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
+(prelude-require-packages '(company))
 
-(prelude-require-packages '(mediawiki))
+(require 'company)
 
-(eval-after-load 'mediawiki
-  '(progn
-     (setq mediawiki-site-alist '(("Wikipedia" "http://en.wikipedia.org/w" "" "" "Main Page")
-                                  ("WikEmacs" "http://wikemacs.org/w/" "" "" "Main Page")))
+(setq company-idle-delay 0.5)
+(setq company-tooltip-limit 10)
+(setq company-minimum-prefix-length 2)
+;; invert the navigation direction if the the completion popup-isearch-match
+;; is displayed on top (happens near the bottom of windows)
+(setq company-tooltip-flip-when-above t)
 
-     ;; Emacs users care more for WikEmacs than Wikipedia :-)
-     (setq mediawiki-site-default "WikEmacs")))
+(global-company-mode 1)
 
-(provide 'prelude-mediawiki)
-
-;;; prelude-mediawiki.el ends here
+(provide 'prelude-company)
+;;; prelude-company.el ends here

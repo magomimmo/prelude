@@ -1,17 +1,16 @@
-;;; prelude-mediawiki.el --- Emacs Prelude: mediawiki editing config
+;;; prelude-elixir.el --- Emacs Prelude: Elixir programming support.
 ;;
-;; Copyright © 2011-2017 Bozhidar Batsov
+;; Copyright © 2014-2017 Samuel Tonini
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
-;; URL: https://github.com/bbatsov/prelude
+;; Author: Samuel Tonini <tonini.samuel@gmail.com>
 ;; Version: 1.0.0
-;; Keywords: convenience
+;; Keywords: convenience elixir
 
 ;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
 
-;; Basic configs for access to WikEmacs and Wikipedia.
+;; Some basic configuration for Elixir development.
 
 ;;; License:
 
@@ -32,16 +31,10 @@
 
 ;;; Code:
 
-(prelude-require-packages '(mediawiki))
+(require 'prelude-programming)
 
-(eval-after-load 'mediawiki
-  '(progn
-     (setq mediawiki-site-alist '(("Wikipedia" "http://en.wikipedia.org/w" "" "" "Main Page")
-                                  ("WikEmacs" "http://wikemacs.org/w/" "" "" "Main Page")))
+(prelude-require-packages '(elixir-mode alchemist))
 
-     ;; Emacs users care more for WikEmacs than Wikipedia :-)
-     (setq mediawiki-site-default "WikEmacs")))
+(provide 'prelude-elixir)
 
-(provide 'prelude-mediawiki)
-
-;;; prelude-mediawiki.el ends here
+;;; prelude-elixir.el ends here

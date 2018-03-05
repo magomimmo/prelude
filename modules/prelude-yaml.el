@@ -1,17 +1,17 @@
-;;; prelude-mediawiki.el --- Emacs Prelude: mediawiki editing config
+;;; prelude-yaml.el --- Emacs Prelude: YAML programming support.
 ;;
 ;; Copyright © 2011-2017 Bozhidar Batsov
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
-;; URL: https://github.com/bbatsov/prelude
+;; Author: ToBeReplaced
+;; URL: http://batsov.com/prelude
 ;; Version: 1.0.0
-;; Keywords: convenience
+;; Keywords: convenience yaml
 
 ;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
 
-;; Basic configs for access to WikEmacs and Wikipedia.
+;; Prelude configuration for YAML.
 
 ;;; License:
 
@@ -31,17 +31,14 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Code:
+(prelude-require-packages '(yaml-mode))
 
-(prelude-require-packages '(mediawiki))
+;; yaml-mode doesn't derive from prog-mode, but we can at least enable
+;; whitespace-mode and apply cleanup.
+(add-hook 'yaml-mode-hook 'whitespace-mode)
+(add-hook 'yaml-mode-hook 'subword-mode)
+(add-hook 'yaml-mode-hook
+          (lambda () (add-hook 'before-save-hook 'prelude-cleanup-maybe nil t)))
 
-(eval-after-load 'mediawiki
-  '(progn
-     (setq mediawiki-site-alist '(("Wikipedia" "http://en.wikipedia.org/w" "" "" "Main Page")
-                                  ("WikEmacs" "http://wikemacs.org/w/" "" "" "Main Page")))
-
-     ;; Emacs users care more for WikEmacs than Wikipedia :-)
-     (setq mediawiki-site-default "WikEmacs")))
-
-(provide 'prelude-mediawiki)
-
-;;; prelude-mediawiki.el ends here
+(provide 'prelude-yaml)
+;;; prelude-yaml.el ends here

@@ -1,6 +1,6 @@
 ;;; prelude-erc.el --- Emacs Prelude: ERC mode configuration.
 ;;
-;; Copyright © 2011-2013 Bozhidar Batsov
+;; Copyright © 2011-2017 Bozhidar Batsov
 ;;
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/prelude
@@ -74,21 +74,10 @@
 (erc-truncate-mode +1)
 
 ;; enable spell checking
-(erc-spelling-mode 1)
+(when prelude-flyspell
+  (erc-spelling-mode 1))
 ;; set different dictionaries by different servers/channels
 ;;(setq erc-spelling-dictionaries '(("#emacs" "american")))
-
-;; TODO - replace this with use of notify.el
-;; Notify my when someone mentions my nick.
-(defun call-libnotify (matched-type nick msg)
-  (let* ((cmsg  (split-string (clean-message msg)))
-         (nick   (first (split-string nick "!")))
-         (msg    (mapconcat 'identity (rest cmsg) " ")))
-    (shell-command-to-string
-     (format "notify-send -u critical '%s says:' '%s'" nick msg))))
-
-(when (eq system-type 'linux)
-  (add-hook 'erc-text-matched-hook 'call-libnotify))
 
 (defvar erc-notify-nick-alist nil
   "Alist of nicks and the last time they tried to trigger a
@@ -115,20 +104,6 @@ that can occur between two notifications.  The default is
       (push (cons nick cur-time) erc-notify-nick-alist)
       t)))
 
-;; private message notification
-(defun erc-notify-on-private-msg (proc parsed)
-  (let ((nick (car (erc-parse-user (erc-response.sender parsed))))
-        (target (car (erc-response.command-args parsed)))
-        (msg (erc-response.contents parsed)))
-    (when (and (erc-current-nick-p target)
-               (not (erc-is-message-ctcp-and-not-action-p msg))
-               (erc-notify-allowed-p nick))
-      (shell-command-to-string
-       (format "notify-send -u critical '%s says:' '%s'" nick msg))
-      nil)))
-
-(add-hook 'erc-server-PRIVMSG-functions 'erc-notify-on-private-msg)
-
 ;; autoaway setup
 (setq erc-auto-discard-away t)
 (setq erc-autoaway-idle-seconds 600)
@@ -137,11 +112,32 @@ that can occur between two notifications.  The default is
 ;; utf-8 always and forever
 (setq erc-server-coding-system '(utf-8 . utf-8))
 
+
+(defvar my-fav-irc '( "irc.freenode.net" )
+  "Stores the list of IRC servers that you want to connect to with start-irc.")
+
+(defvar bye-irc-message "Asta la vista"
+  "Message string to be sent while quitting IRC.")
+
+(defcustom prelude-new-irc-persp nil
+  "True (t) means start IRC in new perspective."
+  :type 'boolean
+  :require 'prelude-erc
+  :group 'prelude)
+
+(defun connect-to-erc (server)
+  "Connects securely to IRC SERVER over TLS at port 6697."
+  (erc-tls :server server
+           :port 6697
+           :nick erc-nick ))
+
 (defun start-irc ()
-  "Connect to IRC."
+  "Connect to IRC?"
   (interactive)
   (when (y-or-n-p "Do you want to start IRC? ")
-    (erc :server "irc.freenode.net" :port 6667 :nick erc-nick)))
+    (when prelude-new-irc-persp
+      (persp-switch "IRC"))
+    (mapcar 'connect-to-erc my-fav-irc)))
 
 (defun filter-server-buffers ()
   (delq nil
@@ -150,12 +146,16 @@ that can occur between two notifications.  The default is
          (buffer-list))))
 
 (defun stop-irc ()
-  "Disconnects from all irc servers"
+  "Disconnects from all irc servers."
   (interactive)
+  (when prelude-new-irc-persp
+    (persp-switch "IRC"))
   (dolist (buffer (filter-server-buffers))
     (message "Server buffer: %s" (buffer-name buffer))
     (with-current-buffer buffer
-      (erc-quit-server "Asta la vista"))))
+      (erc-quit-server bye-irc-message)))
+  (when prelude-new-irc-persp
+    (persp-kill "IRC")))
 
 (provide 'prelude-erc)
 

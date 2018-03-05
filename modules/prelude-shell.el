@@ -1,4 +1,4 @@
-;;; prelude-mediawiki.el --- Emacs Prelude: mediawiki editing config
+;;; prelude-shell.el --- Emacs Prelude: sh-mode configuration.
 ;;
 ;; Copyright © 2011-2017 Bozhidar Batsov
 ;;
@@ -11,7 +11,7 @@
 
 ;;; Commentary:
 
-;; Basic configs for access to WikEmacs and Wikipedia.
+;; Some basic configuration for cc-mode and the modes derived from it.
 
 ;;; License:
 
@@ -32,16 +32,20 @@
 
 ;;; Code:
 
-(prelude-require-packages '(mediawiki))
+(require 'sh-script)
 
-(eval-after-load 'mediawiki
-  '(progn
-     (setq mediawiki-site-alist '(("Wikipedia" "http://en.wikipedia.org/w" "" "" "Main Page")
-                                  ("WikEmacs" "http://wikemacs.org/w/" "" "" "Main Page")))
+;; recognize prezto files as zsh scripts
+(defvar prelude-prezto-files '("zlogin" "zlogin" "zlogout" "zpreztorc" "zprofile" "zshenv" "zshrc"))
 
-     ;; Emacs users care more for WikEmacs than Wikipedia :-)
-     (setq mediawiki-site-default "WikEmacs")))
+(mapc (lambda (file)
+        (add-to-list 'auto-mode-alist `(,(format "\\%s\\'" file) . sh-mode)))
+      prelude-prezto-files)
 
-(provide 'prelude-mediawiki)
+(add-hook 'sh-mode-hook
+          (lambda ()
+            (if (and buffer-file-name
+                     (member (file-name-nondirectory buffer-file-name) prelude-prezto-files))
+                (sh-set-shell "zsh"))))
 
-;;; prelude-mediawiki.el ends here
+(provide 'prelude-shell)
+;;; prelude-shell.el ends here
